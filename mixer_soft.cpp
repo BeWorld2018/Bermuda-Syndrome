@@ -7,7 +7,11 @@
 #include "mixer.h"
 #include "systemstub.h"
 #ifdef BERMUDA_VORBIS
+#ifdef __MORPHOS__
+#include <proto/vorbisfile.h>
+#else
 #include <vorbis/vorbisfile.h>
+#endif
 #endif
 
 static const int _fracStepBits = 8;
@@ -174,7 +178,11 @@ struct MixerChannel_Vorbis : MixerChannel {
 		ovcb.seek_func  = file_vorbis_seek_helper;
 		ovcb.close_func = file_vorbis_close_helper;
 		ovcb.tell_func  = file_vorbis_tell_helper;
+#ifdef __MORPHOS__
+		if (ov_open_callbacks(f, &_ovf, 0, 0, &ovcb) < 0) {
+#else
 		if (ov_open_callbacks(f, &_ovf, 0, 0, ovcb) < 0) {
+#endif
 			warning("Invalid .ogg file");
 			return false;
 		}
